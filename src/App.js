@@ -1,42 +1,23 @@
 import React, { Component } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
-import axios from "axios";
 
 // Components
 import Sidebar from "./Sidebar";
-import Loading from "./Loading";
 import AuthorsList from "./AuthorsList";
 import AuthorDetail from "./AuthorDetail";
-
-const instance = axios.create({
-  baseURL: "https://the-index-api.herokuapp.com"
-});
+import {connect} from "react-redux";
+import * as indexAction from '././store/actions/index';
+import Loading from "./Loading";
 
 class App extends Component {
-  state = {
-    authors: [],
-    loading: true
-  };
 
-  fetchAllAuthors = async () => {
-    const res = await instance.get("/api/authors/");
-    return res.data;
+  componentDidMount(){
+    if (this.props.authors.length < 1)
+      return this.props.showAuthor();
   };
-
-  async componentDidMount() {
-    try {
-      const authors = await this.fetchAllAuthors();
-      this.setState({
-        authors: authors,
-        loading: false
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  }
 
   getView = () => {
-    if (this.state.loading) {
+    if (this.props.loading) {
       return <Loading />;
     } else {
       return (
@@ -46,7 +27,7 @@ class App extends Component {
           <Route
             path="/authors/"
             render={props => (
-              <AuthorsList {...props} authors={this.state.authors} />
+              <AuthorsList {...props} authors={this.props.filteredAuthors} />
             )}
           />
         </Switch>
@@ -54,12 +35,13 @@ class App extends Component {
     }
   };
 
+
   render() {
     return (
       <div id="app" className="container-fluid">
         <div className="row">
           <div className="col-2">
-            <Sidebar />
+            <Sidebar/>
           </div>
           <div className="content col-10">{this.getView()}</div>
         </div>
@@ -68,4 +50,16 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapDispatchToProps = dispatch => {
+  return {
+    showAuthor:() => dispatch(indexAction.fetchAuthors()),  
+  };
+};
+const mapStateToProps = state => {
+    return {
+      authors:state.authors.authors,
+      filteredAuthors:state.authors.filteredAuthors,
+      loading:state.authors.loading,
+    }
+};
+export default connect(mapStateToProps,mapDispatchToProps)(App);

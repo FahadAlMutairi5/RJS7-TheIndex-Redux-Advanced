@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
-
 // Logo
 import logo from "./assets/theindex.svg";
 
@@ -18,5 +17,7 @@ class Sidebar extends Component {
     );
   }
 }
+
+
 
 export default Sidebar;
